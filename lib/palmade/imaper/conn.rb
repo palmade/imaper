@@ -46,6 +46,9 @@ module Palmade::Imaper
         # let's select the default mailbox
         select
 
+        # let's figure, out the mailbox path delimeter
+        figure_out_mailbox_delimeter
+
         # return imap object
         @imap
       end
@@ -180,6 +183,12 @@ module Palmade::Imaper
     end
 
     protected
+
+    def figure_out_mailbox_delimeter
+      pp imap.list('', '*')
+
+      @mb_delim = imap.list('', '')[0].delim
+    end
 
     def close
       imap.close

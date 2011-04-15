@@ -95,7 +95,9 @@ module Palmade::Imaper
 
               unless at.nil?
                 if at < expire_at
-                  puts "  Archiving #{email.display_line}"
+                  fp = figure_out_folder_path(email, filing)
+
+                  puts "  Archiving #{fp} #{email.display_line}"
                 end
               else
                 puts "  ! Skipping #{email.uid}, can't figure out received time"
@@ -109,7 +111,18 @@ module Palmade::Imaper
 
       protected
 
+      def figure_out_folder_path(email, filing = :monthly)
+        at = email.received_time
 
+        case filing
+        when :monthly
+          fp = [ at.year, at.mon ]
+        when :daily
+          fp = [ at.year, at.mon, at.day ]
+        else
+          raise "Unsupported filing startegy #{filing}"
+        end
+      end
     end
   end
 end
