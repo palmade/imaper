@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+# try, to resolve where we at.
+me_path = __FILE__
+me_path = File.readlink(me_path) if File.symlink?(me_path)
+me_path = File.expand_path(me_path)
+
+begin
+  require "rubygems"
+  require "bundler"
+rescue LoadError
+  raise "Could not load the bundler gem. Install it with `gem install bundler`."
+end
+
+if Gem::Version.new(Bundler::VERSION) <= Gem::Version.new("0.9.24")
+  raise RuntimeError, "Your bundler version is too old." +
+   "Run `gem install bundler` to upgrade."
+end
+
+begin
+  # Set up load paths for all bundled gems
+  ENV["BUNDLE_GEMFILE"] = File.expand_path("../../Gemfile", me_path)
+  Bundler.setup
+rescue Bundler::GemNotFound
+  raise RuntimeError, "Bundler couldn't find some gems." +
+    "Did you run bundle install?"
+end
+
+require 'pp'
+require File.expand_path('../../lib/palmade/imaper', me_path)
+
+Palmade::Imaper::Cli.run!(me_path, ARGV)
