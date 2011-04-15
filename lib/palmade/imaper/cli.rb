@@ -51,6 +51,10 @@ module Palmade
           Commands::ListCommand.new(self).run!(cmd_options)
         when 'mark', 'unmark'
           Commands::MarkCommand.new(self).run!(cmd_options)
+        when 'archive'
+          Commands::ArchiveCommand.new(self).run!(cmd_options)
+        when 'auto_archive'
+          Commands::AutoArchiveCommand.new(self).run!(cmd_options)
         else
           puts @opts
         end

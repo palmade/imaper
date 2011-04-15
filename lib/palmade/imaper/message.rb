@@ -1,3 +1,5 @@
+require 'time'
+
 module Palmade::Imaper
   class Message
     Error.define_error(self, :MessageError, :message)
@@ -11,6 +13,41 @@ module Palmade::Imaper
       @flags = params[:flags]
       @header = Mail::Header.new(params[:header])
       @size = params[:size]
+    end
+
+    def display_line
+      from = @header[:from].addresses.first
+      subject = @header[:subject].value
+      subject = "%s..." % subject if subject.length > 60
+      at = received_time
+
+      if at.nil?
+        at = '!'
+      else
+        at = at.to_s(:rfc2822)
+      end
+
+      sprintf("%s %s %s %s", uid, at, from, subject)
+    end
+
+    def received_time
+      if defined?(@received_time)
+        @received_time
+      else
+        at = nil
+        @header[:received].each do |rcvd|
+          at_txt = rcvd.value.split(/\s*\;\s*/, 2)[1]
+          unless at_txt.nil? || at_txt.empty?
+            at = Time.rfc2822(at_txt) rescue Time.prase(date) rescue nil
+            unless at.nil?
+              at = at.utc
+              break
+            end
+          end
+        end
+
+        @received_time = at
+      end
     end
 
     # retrieves the full e-mail message, from the IMAP server.

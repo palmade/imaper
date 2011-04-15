@@ -49,6 +49,16 @@ module Palmade::Imaper
                      email.header['From'].addresses.inspect,
                      subject)
       end
+
+      def parse_command_arguments
+        args = { }
+        argv.each do |a|
+          if a =~ /\A([a-zA-Z][a-zA-Z0-9]+)\s*\=\s*(.+)\s*\Z/
+            args[$~[1].to_sym] = $~[2]
+          end
+        end
+        args
+      end
     end
   end
 end
