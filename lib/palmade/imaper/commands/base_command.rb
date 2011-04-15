@@ -15,15 +15,15 @@ module Palmade::Imaper
 
       protected
 
-      def require_mailbox!(cmd_options)
-        raise "Mailbox required, please specify one" unless cmd_options.include?(:mb_name)
+      def require_account!(cmd_options)
+        raise "Account required, please specify one" unless cmd_options.include?(:account_name)
       end
 
-      def connect_mailbox(mb_config, &block)
-        puts "Connecting... #{mb_config[:address]}"
+      def connect_account(account_config, &block)
+        puts "Connecting... #{account_config[:address]}"
         $stdout.flush
 
-        conn = Palmade::Imaper::Conn.new(mb_config)
+        conn = Palmade::Imaper::Conn.new(account_config)
         conn.connect!
 
         if block_given?

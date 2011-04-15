@@ -55,6 +55,10 @@ module Palmade
           Commands::ArchiveCommand.new(self).run!(cmd_options)
         when 'auto_archive'
           Commands::AutoArchiveCommand.new(self).run!(cmd_options)
+        when 'listmb'
+          Commands::ListmbCommand.new(self).run!(cmd_options)
+        when 'show'
+          Commands::ShowCommand.new(self).run!(cmd_options)
         else
           puts @opts
         end
@@ -132,6 +136,10 @@ module Palmade
           cmd_options[:start] = 0
         end
 
+        unless cmd_options.include?(:dry_run)
+          cmd_options[:dry_run] = false
+        end
+
         cmd_options
       end
 
@@ -145,8 +153,8 @@ module Palmade
             cmd_options[:config_file] = c
           end
 
-          opts.on("-m", "--mailbox [mb_name]", "Select mailbox") do |m|
-            cmd_options[:mb_name] = m
+          opts.on("-a", "--account [account_name]", "Select account") do |a|
+            cmd_options[:account_name] = a
           end
 
           opts.on("--count [COUNT]", "Number of e-mails to show") do |count|
@@ -159,6 +167,14 @@ module Palmade
 
           opts.on("--start [START]", "Start from a given offset in UID set") do |start|
             cmd_options[:start] = start
+          end
+
+          opts.on("--mailbox [mailbox_path]", "Use the specificied mailbox on the server") do |m|
+            cmd_options[:mailbox_path] = m
+          end
+
+          opts.on("--dry-run", "Set to dry-run, don't do the real thing yet") do |dr|
+            cmd_options[:dry_run] = true
           end
         end
 

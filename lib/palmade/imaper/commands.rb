@@ -5,5 +5,7 @@ module Palmade::Imaper
     autoload :MarkCommand, File.join(IMAPER_LIB_DIR, 'imaper/commands/mark_command')
     autoload :ArchiveCommand, File.join(IMAPER_LIB_DIR, 'imaper/commands/archive_command')
     autoload :AutoArchiveCommand, File.join(IMAPER_LIB_DIR, 'imaper/commands/auto_archive_command')
+    autoload :ListmbCommand, File.join(IMAPER_LIB_DIR, 'imaper/commands/listmb_command')
+    autoload :ShowCommand, File.join(IMAPER_LIB_DIR, 'imaper/commands/show_command')
   end
 end

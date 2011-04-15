@@ -2,7 +2,8 @@ module Palmade::Imaper
   class Flags
     DEFAULT_FLAG_SET = {
       :seen => 'Seen',
-      :parsed => 'Parsed'
+      :parsed => 'Parsed',
+      :deleted => :deleted
     }
 
     def initialize(conn, set = { })

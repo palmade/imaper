@@ -15,6 +15,7 @@ module Palmade::Imaper
 
     DEFAULT_SETTINGS = {
       :mailbox => DEFAULT_MAILBOX,
+      :refname => DEFAULT_MAILBOX,
       :address => 'localhost',
       :port => 143,
       :user_name => nil,
@@ -27,6 +28,7 @@ module Palmade::Imaper
 
     def initialize(settings)
       @settings = DEFAULT_SETTINGS.merge(settings)
+      @refname = @settings[:refname]
     end
 
     def imap
@@ -52,6 +54,10 @@ module Palmade::Imaper
         # return imap object
         @imap
       end
+    end
+
+    def select(mailbox = nil, &block)
+      imap.select(mailbox || default_mailbox)
     end
 
     def find_unseen(limit = 10, &block)
@@ -85,7 +91,7 @@ module Palmade::Imaper
         unless resp.nil? || resp.empty?
           [ resp.collect { |r| r.attr['RFC822'] } ]
         else
-          raise ConnError.new(:uid_fetch_returned_nil_or_empty)
+          [ [ ] ]
         end
       end
     end
@@ -110,7 +116,7 @@ module Palmade::Imaper
             }.compact
           ]
         else
-          raise ConnError.new(:uid_fetch_returned_nil_or_empty)
+          [ [ ] ]
         end
       end
     end
@@ -145,6 +151,26 @@ module Palmade::Imaper
 
     def unset_seen_flag(*uids)
       imap.uid_store(uids.flatten, '-FLAGS', [ flags[:seen] ])
+    end
+
+    def mark_deleted(*uids)
+      imap.uid_store(uids.flatten, '+FLAGS', [ flags[:deleted] ])
+    end
+
+    def mark_undeleted(*uids)
+      imap.uid_store(uids.flatten, '-FLAGS', [ flags[:deleted] ])
+    end
+
+    def copy(uids, mb_name)
+      imap.uid_copy(uids.flatten, mb_name)
+    end
+
+    def expunge
+      imap.expunge
+    end
+
+    def close
+      imap.close
     end
 
     # just call imap method, as it will do a connection on demand.
@@ -182,20 +208,52 @@ module Palmade::Imaper
       end
     end
 
+    def list_mailboxes
+      imap.list(@refname, '*')
+    end
+
+    def mk_mailbox_recursively(orig_paths)
+      paths = [ ]
+      mb = nil
+
+      orig_paths.each do |p|
+        paths.push(p)
+        mb = mk_mailbox(paths)
+      end
+
+      mb
+    end
+
+    def mk_mailbox(paths)
+      mb_path = paths.join(@mb_delim)
+
+      if mb = mb_exists?(paths)
+        if mb.attr.include?(:Noselect)
+          create_mailbox(mb_path)
+          mb = mb_exists?(paths)
+        end
+      else
+        create_mailbox(mb_path)
+        mb = mb_exists?(paths)
+      end
+
+      mb
+    end
+
+    def mb_exists?(paths)
+      mb_path = paths.join(@mb_delim)
+      ml = imap.list(@refname, mb_path)
+      !ml.nil? && !ml.empty? && ml[0]
+    end
+
     protected
 
+    def create_mailbox(mb_path)
+      imap.create([ @refname, mb_path ].join(@mb_delim))
+    end
+
     def figure_out_mailbox_delimeter
-      pp imap.list('', '*')
-
       @mb_delim = imap.list('', '')[0].delim
-    end
-
-    def close
-      imap.close
-    end
-
-    def select(mailbox = nil, &block)
-      imap.select(mailbox || default_mailbox)
     end
 
     def default_mailbox

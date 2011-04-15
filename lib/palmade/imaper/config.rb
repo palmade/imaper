@@ -11,18 +11,22 @@ module Palmade
 
       def load_file!(config_file)
         @config = YAML.load_file(config_file)
+
+        raise "No accounts configured" unless @config.include?('accounts')
+
+        @config
       end
 
-      # Override this method, to retrieve mailbox configuration from
+      # Override this method, to retrieve account configuration from
       # another source. E.g. mongo db or mysql database.
       #
-      def select_mailbox(mb_name)
-        mb_name = mb_name.to_s
+      def select_account(account_name)
+        account_name = account_name.to_s
 
-        if config['mailboxes'].include?(mb_name)
-          config['mailboxes'][mb_name].symbolize_keys
+        if config['accounts'].include?(account_name)
+          config['accounts'][account_name].symbolize_keys
         else
-          raise "Mailbox #{mb_name} not defined."
+          raise "Account #{account_name} not defined."
         end
       end
     end

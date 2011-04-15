@@ -18,7 +18,7 @@ module Palmade::Imaper
     def display_line
       from = @header[:from].addresses.first
       subject = @header[:subject].value
-      subject = "%s..." % subject if subject.length > 60
+      subject = "%s..." % subject if subject.length > 40
       at = received_time
 
       if at.nil?

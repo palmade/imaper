@@ -2,7 +2,7 @@ module Palmade::Imaper
   module Commands
     class ListCommand < BaseCommand
       def run!(cmd_options)
-        require_mailbox!(cmd_options)
+        require_account!(cmd_options)
 
         case argv[1]
         when 'unseen'
@@ -21,9 +21,21 @@ module Palmade::Imaper
           raise "Unsupported filter #{argv[1]}"
         end
 
-        mb_config = config.select_mailbox(cmd_options[:mb_name])
+        if cmd_options.include?(:mailbox_path)
+          mb_path = cmd_options[:mailbox_path]
+        else
+          mb_path = nil
+        end
 
-        connect_mailbox(mb_config) do |conn|
+        account_config = config.select_account(cmd_options[:account_name])
+
+        connect_account(account_config) do |conn|
+          unless mb_path.nil?
+            puts "Selecting #{mb_path}"
+
+            conn.select(mb_path)
+          end
+
           case query[0]
           when String
             # convert flag to actual IMAP flag

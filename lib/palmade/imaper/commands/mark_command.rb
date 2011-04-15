@@ -2,7 +2,7 @@ module Palmade::Imaper
   module Commands
     class MarkCommand < BaseCommand
       def run!(cmd_options)
-        require_mailbox!(cmd_options)
+        require_account!(cmd_options)
 
         store = [ ]
         case argv[0]
@@ -31,9 +31,9 @@ module Palmade::Imaper
           raise "No uids specified"
         end
 
-        mb_config = config.select_mailbox(cmd_options[:mb_name])
+        account_config = config.select_account(cmd_options[:account_name])
 
-        connect_mailbox(mb_config) do |conn|
+        connect_account(account_config) do |conn|
           unless store[1].nil?
             store[1] = store[1].collect { |fk| conn.flags[fk] }
           end
